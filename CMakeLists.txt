@@ -17,12 +17,12 @@ option("EchoMIDI_CONAN_AUTO_INSTALL" OFF "Automaticly sets up conan directory an
 set (SRC
 	src/EchoMIDI.cpp
 	src/Echoer.cpp
-	src/MIDI.cpp
+	src/FocusHook.cpp
 )
 
 set (INCLUDE
 	include/Echoer.h
-	include/MIDI.h
+	include/FocusHook.h
 )
 
 # Add source to this project's executable.
