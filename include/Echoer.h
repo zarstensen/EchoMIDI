@@ -8,6 +8,9 @@
 #include <format>
 #include <filesystem>
 
+/// @brief any midi id's with this value will be seen as invalid.
+static constexpr UINT INVALID_MIDI_ID = UINT_MAX;
+
 enum class MIDIIOType : uint8_t
 {
 	UNKNOWN,
@@ -15,6 +18,10 @@ enum class MIDIIOType : uint8_t
 	OUTPUT
 };
 
+/// @brief checks wether id is a valid midi input id.
+bool isValidInID(UINT id);
+/// @brief checks wether id is a valid midi output id.
+bool isValidOutID(UINT id);
 
 /// @brief gets the name of the midi input device id passed.
 /// 
@@ -24,6 +31,23 @@ std::string getMidiInputName(UINT midi_in_id);
 /// 
 /// @throw MIDIEchoExcept
 std::string getMidiOutputName(UINT midi_out_id);
+
+/// @brief retrieves the id of an input midi device by name.
+/// the name passed must match excactly to the device name, before it is recognized as a match.
+/// 
+/// @note if name.size() > MAXPNAMELEN (32), it will return INVALID_MIDI_ID no matter what,
+/// as a midi device name cannot be longer than MAXPNAMELEN.
+/// 
+/// @return the id of the found device. if none is found, INVALID_MIDI_ID is returned
+UINT getMidiInIDByName(std::string name);
+/// @brief retrieves the id of an output midi device by name.
+/// the name passed must match excactly to the device name, before it is recognized as a match.
+/// 
+/// @note if name.size() > MAXPNAMELEN (32), it will return INVALID_MIDI_ID no matter what,
+/// as a midi device name cannot be longer than MAXPNAMELEN.
+/// 
+/// @return the id of the found device. if none is found, INVALID_MIDI_ID is returned
+UINT getMidiOutIDByName(std::string name);
 
 /// @brief same as getMidiInputName if midi_io_type is MIDIIOType::INPUT,
 /// and same as getMidiOutputName if midi_io_type is MIDIIOType::OUTPUT.
@@ -42,10 +66,12 @@ std::string getMidiName(MIDIIOType midi_io_type, UINT midi_id);
 class Echoer
 {
 public:
-	/// @brief struct used for storing a midi output device and its current mute status.
+	/// @brief struct used for storing a midi output device and its current mute status + path.
 	struct MIDIOutDevice
 	{
-		bool muted = false;
+		bool user_muted = false;
+		bool focus_muted = false;
+		std::filesystem::path focus_mute_path;
 		HMIDIOUT device_handle;
 	};
 
@@ -79,19 +105,19 @@ public:
 	void setMute(UINT id, bool state)
 	{
 		assert(m_midi_targets.contains(id));
-		m_midi_targets[id].muted = state;
+		m_midi_targets[id].user_muted = state;
 	}
 
 	/// @return returns wether the device is muted or not. 
 	bool isMuted(UINT id)
 	{
 		assert(m_midi_targets.contains(id));
-		m_midi_targets[id].muted;
+		m_midi_targets[id].user_muted;
 	}
 
-	void focusMute(std::filesystem::path exec);
+	void focusMute(UINT id, std::filesystem::path exec);
 
-	std::filesystem::path getFocusMuteExec();
+	std::filesystem::path getFocusMuteExec(UINT id);
 
 	/// @brief retrieve the current midi output devices which are recieving data from the midi input device.
 	/// @return a map from the device id and its midi output handler and mute status.
@@ -122,6 +148,18 @@ public:
 		return m_is_echoing;
 	}
 
+	/// @brief begin iterator for all the midi output targets
+	auto begin()
+	{
+		return m_midi_targets.begin();
+	}
+
+	/// @brief end iterator for all the midi output targets
+	auto end()
+	{
+		return m_midi_targets.end();
+	}
+
 private:
 	HMIDIIN m_midi_source = NULL;
 	UINT m_midi_id;
@@ -140,7 +178,7 @@ public:
 		: std::runtime_error(msg), short_msg(short_msg), err_code(err_code), type(type), device_id(device_id)
 	{}
 
-	MIDIEchoExcept(MMRESULT err_code, MIDIIOType type = MIDIIOType::UNKNOWN, UINT device_id = -1)
+	MIDIEchoExcept(MMRESULT err_code, MIDIIOType type = MIDIIOType::UNKNOWN, UINT device_id = INVALID_MIDI_ID)
 		: MIDIEchoExcept(std::format("Error occured!\nMMSYRESULT: {}\nID: {}\nI/O TYPE: {}", err_code, device_id, (short)type),
 			"UNKNOWN", err_code, type, device_id)
 	{}
@@ -150,7 +188,7 @@ public:
 	/// @brief the io type of the id that caused the exception.
 	MIDIIOType type = MIDIIOType::UNKNOWN;
 	/// @brief the device id that caused the exception.
-	UINT device_id = -1;
+	UINT device_id = INVALID_MIDI_ID;
 	/// @brief a smaller message describing the error in as few words as possible.
 	std::string short_msg;
 };
@@ -172,7 +210,7 @@ public:
 		: MIDIEchoExcept(std::format(
 			"Bad device ID passed to function: {}\n"
 			"Device ID must be in the range [0 - {}]",
-			bad_id, max_id
+			bad_id, max_id - 1
 		), "BADID", MMSYSERR_BADDEVICEID, type, bad_id)
 	{}
 };
@@ -196,10 +234,3 @@ public:
 			getMidiName(type, device_id)), "OCCUPIED", MMSYSERR_ALLOCATED, type, device_id)
 	{}
 };
-
-/// @brief cast the correct exception, assuming err came from a function which handled input devices
-/// with all the neccecarry information based on err.
-/// if err is MMSYSERR_NOERROR, nothing happens.
-void handleInputErr(MMRESULT err, UINT id);
-/// @brief see handleInputErrMsg(), except the midi device is assumed to be an output device.
-void handleOutputErr(MMRESULT err, UINT id);

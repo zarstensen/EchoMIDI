@@ -1,35 +1,78 @@
 #include "Echoer.h"
+#include "FocusHook.h"
+
+// ============ Local defines ============
 
 #define BADOUTID(bad_id) BadDeviceID(MIDIIOType::INPUT, bad_id, midiOutGetNumDevs())
 #define BADINID(bad_id) BadDeviceID(MIDIIOType::OUTPUT, bad_id, midiInGetNumDevs())
 
+// cast the correct exception, assuming err came from a function which handled input devices
+// with all the neccecarry information based on err.
+// if err is MMSYSERR_NOERROR, nothing happens.
+void handleInputErr(MMRESULT err, UINT id)
+{
+	try
+	{
+		switch (err)
+		{
+		case MMSYSERR_NOERROR:
+			return;
+		case MMSYSERR_BADDEVICEID:
+			throw BADINID(id);
+		case MMSYSERR_ALLOCATED:
+			throw DeviceAllocated(MIDIIOType::INPUT, id);
+		default:
+			throw MIDIEchoExcept(err, MIDIIOType::INPUT, id);
+		}
+	}
+	catch (...)
+	{
+		// the id is invalid
+		if (id == INVALID_MIDI_ID)
+			std::throw_with_nested(BADINID(id));
+		else
+			throw;
+	}
+}
 
-// gets the executable of the passed window
-// returns an empty path if access is denied
-//std::filesystem::path getHWNDPath(HWND window)
-//{
-//	DWORD win_pid;
-//	WINERRB(GetWindowThreadProcessId(window, &win_pid));
-//
-//	WCHAR win_path[MAX_PATH_LENGTH];
-//
-//	HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, win_pid);
-//
-//
-//	// not high enough privilages
-//	if (hProc == NULL)
-//		return "";
-//	else
-//		WINERRB(hProc);
-//
-//	DWORD len = MAX_PATH_LENGTH;
-//	WINERRB(QueryFullProcessImageName(hProc, NULL, win_path, &len));
-//
-//	WINERRB(CloseHandle(hProc));
-//
-//	return win_path;
-//}
+// see handleInputErrMsg(), except the midi device is assumed to be an output device.
+void handleOutputErr(MMRESULT err, UINT id)
+{
+	try
+	{
+		switch (err)
+		{
+		case MMSYSERR_NOERROR:
+			return;
+		case MMSYSERR_BADDEVICEID:
+			throw BADOUTID(id);
+		case MMSYSERR_ALLOCATED:
+			throw DeviceAllocated(MIDIIOType::OUTPUT, id);
+		default:
+			throw MIDIEchoExcept(err, MIDIIOType::OUTPUT, id);
+		}
+	}
+	catch (...)
+	{
+		// the id is invalid
+		if (id == INVALID_MIDI_ID)
+			std::throw_with_nested(BADOUTID(id));
+		else
+			throw;
+	}
+}
 
+// ============ Header defines ============
+
+bool isValidInID(UINT id)
+{
+	return id < midiInGetNumDevs();
+}
+
+bool isValidOutID(UINT id)
+{
+	return id < midiOutGetNumDevs();
+}
 
 std::string getMidiInputName(UINT midi_in_id)
 {
@@ -49,6 +92,34 @@ std::string getMidiOutputName(UINT midi_out_id)
 	return midi_info.szPname;
 }
 
+UINT getMidiInIDByName(std::string name)
+{
+	if (name.size() <= MAXPNAMELEN)
+	{
+		for (UINT i = 0; i < midiInGetNumDevs(); i++)
+		{
+			if(name == getMidiInputName(i))
+				return i;
+		}
+	}
+
+	return UINT_MAX;
+}
+
+UINT getMidiOutIDByName(std::string name)
+{
+	if (name.size() <= MAXPNAMELEN)
+	{
+		for (UINT i = 0; i < midiOutGetNumDevs(); i++)
+		{
+			if (name == getMidiOutputName(i))
+				return i;
+		}
+	}
+
+	return UINT_MAX;
+}
+
 std::string getMidiName(MIDIIOType midi_io_type, UINT midi_id)
 {
 	switch (midi_io_type)
@@ -62,53 +133,44 @@ std::string getMidiName(MIDIIOType midi_io_type, UINT midi_id)
 	}
 }
 
-void handleInputErr(MMRESULT err, UINT id)
-{
-	switch (err)
-	{
-	case MMSYSERR_NOERROR:
-		return;
-	case MMSYSERR_BADDEVICEID:
-		throw BADINID(id);
-	case MMSYSERR_ALLOCATED:
-		throw DeviceAllocated(MIDIIOType::INPUT, id);
-	default:
-		throw MIDIEchoExcept(err, MIDIIOType::INPUT, id);
-	}
-}
-
-void handleOutputErr(MMRESULT err, UINT id)
-{
-	switch (err)
-	{
-	case MMSYSERR_NOERROR:
-		return;
-	case MMSYSERR_BADDEVICEID:
-		throw BADOUTID(id);
-	case MMSYSERR_ALLOCATED:
-		throw DeviceAllocated(MIDIIOType::OUTPUT, id);
-	default:
-		throw MIDIEchoExcept(err, MIDIIOType::OUTPUT, id);
-	}
-}
+#include <iostream>
 
 void CALLBACK midiCallback(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
 {
 	Echoer* _this = (Echoer*)dwInstance;
 
-	for (auto[id, midi_out] : _this->getTargets())
+	// Only midi data should be sent to the outputs.
+	if (wMsg == MIM_DATA)
 	{
-		if(!midi_out.muted)
-			handleOutputErr(midiOutShortMsg(midi_out.device_handle, (DWORD)dwParam1), id);
+		for (auto [id, midi_out] : _this->getTargets())
+		{
+			if (!(midi_out.user_muted || midi_out.focus_muted))
+				handleOutputErr(midiOutShortMsg(midi_out.device_handle, (DWORD)dwParam1), id);
+
+		}
+	}
+	else if (wMsg == MIM_LONGDATA)
+	{
+		for (auto [id, midi_out] : _this->getTargets())
+		{
+			if (!(midi_out.user_muted || midi_out.focus_muted))
+				handleOutputErr(midiOutLongMsg(midi_out.device_handle, (LPMIDIHDR)dwParam1, (UINT)dwParam2), id);
+
+		}
 	}
 }
+
+// ============ Echoer ============
 
 Echoer::Echoer(UINT source)
 	: m_midi_id(source)
 {
+	
 	MMRESULT res = midiInOpen(&m_midi_source, m_midi_id, (DWORD_PTR)&midiCallback, (DWORD_PTR)this, CALLBACK_FUNCTION);
 	
 	handleInputErr(res, source);
+
+	registerEchoer(this);
 }
 
 Echoer::~Echoer()
@@ -116,12 +178,18 @@ Echoer::~Echoer()
 	if (isEchoing())
 		stop();
 
+	handleInputErr(midiInReset(m_midi_source), m_midi_id);
 	MMRESULT res = midiInClose(m_midi_source);
 
 	handleInputErr(res, m_midi_id);
 
 	for (auto [id, target] : getTargets())
+	{
+		handleOutputErr(midiOutReset(target.device_handle), id);
 		handleOutputErr(midiOutClose(target.device_handle), id);
+	}
+
+	unregisterEchoer(this);
 }
 
 bool Echoer::add(UINT id)
@@ -162,3 +230,20 @@ void Echoer::stop()
 	handleOutputErr(midiInStop(m_midi_source), m_midi_id);
 }
 
+void Echoer::focusMute(UINT id, std::filesystem::path exec)
+{
+	if (!m_midi_targets.contains(id))
+	{
+		throw BADOUTID(id);
+		return;
+	}
+
+	// as a focus event does not occur when this is called, the top window needs to be retrieved manually.
+	// if the GUI is used, this will almost always be false, as the GUI window always will be in focus, when this is called.
+	if (exec != "")
+		m_midi_targets[id].focus_muted = exec != getHWNDPath(GetTopWindow(NULL));
+	else
+		m_midi_targets[id].focus_muted = false;
+
+	m_midi_targets[id].focus_mute_path = exec;
+}
