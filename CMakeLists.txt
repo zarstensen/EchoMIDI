@@ -6,7 +6,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 
-project("EchoMIDI" VERSION 0.2.0 LANGUAGES CXX)
+project("EchoMIDI" VERSION 0.3.0 LANGUAGES CXX)
 
 # place all predefined target projects into a filter
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -16,7 +16,6 @@ option("${PROJECT_NAME}_CONAN_AUTO_INSTALL" OFF "Automaticly sets up conan direc
 option("${PROJECT_NAME}_GEN_DOCS" OFF "Generate docs using Doxygen. (requires Doxygen to be installed)")
 
 set (SRC
-	src/EchoMIDI.cpp
 	src/Echoer.cpp
 	src/FocusHook.cpp
 )
@@ -27,7 +26,7 @@ set (INCLUDE
 )
 
 # Add source to this project's executable.
-add_executable ( ${PROJECT_NAME} 
+add_library ( ${PROJECT_NAME} 
 	${INCLUDE} ${SRC}
 )
 
@@ -45,6 +44,8 @@ source_group("include" FILES ${INCLUDE})
 # handle packages
 
 target_link_libraries(${PROJECT_NAME} winmm.lib)
+
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/EchoMIDIApp")
 
 # doxygen and docs generation
 

@@ -12,6 +12,7 @@ EchoMIDI is a program + library that copies the output of a midi device into mul
 ## Application
 
 In development.
+Currently a very simple command line implementation of the EchoMIDI library, allowing one to echo a single input device, per exe instance.
 
 ## Library
 
@@ -32,6 +33,7 @@ If at any point an error occurs in the library code, an MIDIEchoExcept will be t
 EchoMIDI Uses CMake as its build system. It exposes the following options and targets.
 
 > EchoMIDI                      (LIBRARY TARGET)
+> EchoMIDIApp                   (EXECUTABLE TARGET)
 > EchoMIDI_CONAN_AUTO_INSTALL   (OPTION ON/OFF)
 > EchoMIDI_GEN_DOCS             (OPTION ON/OFF)
 
@@ -42,7 +44,7 @@ Currently no dependencies exists, but there will come some in the future.
 This requires Conan to be installed.
 
 `EchoMIDI_GEN_DOCS`
-Creates the EchoMIDI_DOCS target, which generates an HTML documentation, using Doxygen. It is also generated when building the ALL target.
+Creates the `EchoMIDI_DOCS` target, which generates an HTML documentation, using Doxygen. It is also generated when building the `ALL_BUILD` target.
 The documentation is placed in the binary directory under the docs folder.
 
 This requires Doxygen to be installed.
