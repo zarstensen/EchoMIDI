@@ -18,7 +18,7 @@ Currently a very simple command line implementation of the EchoMIDI library, all
 
 ### Overview
 
-Generally, each program using the EchoMIDI library should call EchoMIDIInit() before any Echoer::start() method is called, ideally before any other EchoMIDI function, and should call focusMuterCleanup() when the EchoMIDI library features are no longer needed.
+Generally, each program using the EchoMIDI library should call EchoMIDIInit() before any Echoer::start() method is called, ideally before any other EchoMIDI function, and should call EchoMIDICleanup() when the EchoMIDI library features are no longer needed.
 
 Each input MIDI device that needs to duplicate (or echo) its output, is associated with an Echoer instance. On construction, it needs a MIDI device id, which you can manually determine, or find by using the getMidiInIDByName() method. After construction, the output targets are added with the add() method and removed with the remove() method. Finally, an Echoer instance only echoes its associated MIDI devices output, if it has been started using the start() method.
 
