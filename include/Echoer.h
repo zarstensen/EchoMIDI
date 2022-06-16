@@ -74,7 +74,7 @@ namespace EchoMIDI
 			bool user_muted = false;
 			bool focus_muted = false;
 			std::filesystem::path focus_mute_path;
-			HMIDIOUT device_handle;
+			HMIDIOUT device_handle = NULL;
 		};
 
 	public:

@@ -135,8 +135,6 @@ namespace EchoMIDI
 		}
 	}
 
-#include <iostream>
-
 	void CALLBACK midiCallback(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
 	{
 		Echoer* _this = (Echoer*)dwInstance;

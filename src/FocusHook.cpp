@@ -102,8 +102,6 @@ namespace EchoMIDI
 	// In order to reduce overhead, a single global hook is used for all Echoer instances.
 	void focusHook(HWINEVENTHOOK hwin_hook, DWORD event_id, HWND window, LONG id_object, LONG id_child, DWORD id_event_thread, DWORD event_time)
 	{
-		std::cout << event_id << '\n';
-
 		if (event_id == EVENT_OBJECT_FOCUS)
 		{
 			std::filesystem::path window_path = getHWNDPath(window);
@@ -112,7 +110,6 @@ namespace EchoMIDI
 			if (window_path == "")
 				return;
 
-			std::cout << window_path << '\n';
 			for (Echoer* echoer : registered_echoers)
 			{
 				for (auto& [id, midi_out] : *echoer)
