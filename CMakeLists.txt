@@ -6,7 +6,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 
-project("EchoMIDI" VERSION 0.1.2 LANGUAGES CXX)
+project("EchoMIDI" VERSION 0.2.0 LANGUAGES CXX)
 
 # place all predefined target projects into a filter
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -96,6 +96,8 @@ if(${${PROJECT_NAME}_CONAN_AUTO_INSTALL})
 endif()
 
 include("${CMAKE_BINARY_DIR}/conan/conan_paths.cmake" OPTIONAL)
+
+# CURRENTLY UNUSED
 
 include(InstallRequiredSystemLibraries)
 set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
