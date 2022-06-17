@@ -67,7 +67,11 @@ namespace EchoMIDI
 
 	std::filesystem::path getHWNDPath(HWND window)
 	{
+		if (!IsWindow(window))
+			return "";
+
 		DWORD win_pid;
+		
 		WINERRB(GetWindowThreadProcessId(window, &win_pid));
 
 		TCHAR win_path[MAX_PATH];
