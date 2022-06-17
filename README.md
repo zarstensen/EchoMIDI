@@ -18,7 +18,7 @@ Currently a very simple command line implementation of the EchoMIDI library, all
 
 ### Overview
 
-Generally, each program using the EchoMIDI library should call EchoMIDIInit() before any Echoer::start() method is called, ideally before any other EchoMIDI function, and should call focusMuterCleanup() when the EchoMIDI library features are no longer needed.
+Generally, each program using the EchoMIDI library should call EchoMIDIInit() before any Echoer::start() method is called, ideally before any other EchoMIDI function, and should call EchoMIDICleanup() when the EchoMIDI library features are no longer needed.
 
 Each input MIDI device that needs to duplicate (or echo) its output, is associated with an Echoer instance. On construction, it needs a MIDI device id, which you can manually determine, or find by using the getMidiInIDByName() method. After construction, the output targets are added with the add() method and removed with the remove() method. Finally, an Echoer instance only echoes its associated MIDI devices output, if it has been started using the start() method.
 
@@ -32,10 +32,12 @@ If at any point an error occurs in the library code, an MIDIEchoExcept will be t
 
 EchoMIDI Uses CMake as its build system. It exposes the following options and targets.
 
-> EchoMIDI                      (LIBRARY TARGET)
-> EchoMIDIApp                   (EXECUTABLE TARGET)
-> EchoMIDI_CONAN_AUTO_INSTALL   (OPTION ON/OFF)
-> EchoMIDI_GEN_DOCS             (OPTION ON/OFF)
+```
+EchoMIDI                      (LIBRARY TARGET)  
+EchoMIDIApp                   (EXECUTABLE TARGET)  
+EchoMIDI_CONAN_AUTO_INSTALL   (OPTION ON/OFF)  
+EchoMIDI_GEN_DOCS             (OPTION ON/OFF)  
+``` 
 
 `EchoMIDI_CONAN_AUTO_INSTALL`
 Automaticly downloads any dependencies and makes them avaliable to the build system.
