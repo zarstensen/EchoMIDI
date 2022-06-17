@@ -1,0 +1,3 @@
+[submodule "EchoMIDIApp/modules/wxWidgets"]
+	path = EchoMIDIApp/modules/wxWidgets
+	url = https://github.com/wxWidgets/wxWidgets
