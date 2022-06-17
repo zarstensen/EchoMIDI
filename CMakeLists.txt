@@ -6,7 +6,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 
-project("EchoMIDI" VERSION 0.3.0 LANGUAGES CXX)
+project("EchoMIDI" VERSION 0.3.1 LANGUAGES CXX)
 
 # place all predefined target projects into a filter
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
