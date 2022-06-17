@@ -45,8 +45,8 @@ namespace EchoMIDI
 		return success;
 	}
 
-#define WINERR(err) winErr((DWORD) err, TEXT(__FILE__), __LINE__)
-#define WINERRB(err) winErrB((std::ptrdiff_t) err, TEXT(__FILE__), __LINE__)
+#define WINERR(err) winErr((DWORD) err, TEXT(__RELATIVE_FILE__), __LINE__)
+#define WINERRB(err) winErrB((std::ptrdiff_t) err, TEXT(__RELATIVE_FILE__), __LINE__)
 
 	void setLogFile(std::filesystem::path lout, bool clear)
 	{

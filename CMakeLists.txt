@@ -30,6 +30,24 @@ add_library ( ${PROJECT_NAME}
 	${INCLUDE} ${SRC}
 )
 
+# create __RELATIVE_FILE__ macro for log output
+
+foreach(SRC_FILE ${SRC} ${INCLUDE})
+
+	message(${SRC_FILE})
+
+	get_property(COMP_DEFS SOURCE ${SRC_FILE} PROPERTY COMPILE_DEFINITIONS)
+
+	get_filename_component(ABS_PATH ${SRC_FILE} ABSOLUTE ${CMAKE_CURRENT_SOURCE_DIR})
+	get_filename_component(REL_ROOT ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+
+	string(REPLACE ${REL_ROOT} "" REL_PATH ${ABS_PATH})
+
+	list(APPEND COMP_DEFS "__RELATIVE_FILE__=\"${REL_PATH}\"")
+
+	set_property(SOURCE ${SRC_FILE} PROPERTY COMPILE_DEFINITIONS ${COMP_DEFS})
+endforeach()
+
 if(MSVC)
   target_compile_options(${PROJECT_NAME}  PUBLIC "/ZI")
   target_link_options(${PROJECT_NAME}  PUBLIC "/INCREMENTAL")
