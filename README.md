@@ -32,10 +32,12 @@ If at any point an error occurs in the library code, an MIDIEchoExcept will be t
 
 EchoMIDI Uses CMake as its build system. It exposes the following options and targets.
 
-> EchoMIDI                      (LIBRARY TARGET)
-> EchoMIDIApp                   (EXECUTABLE TARGET)
-> EchoMIDI_CONAN_AUTO_INSTALL   (OPTION ON/OFF)
-> EchoMIDI_GEN_DOCS             (OPTION ON/OFF)
+```
+EchoMIDI                      (LIBRARY TARGET)  
+EchoMIDIApp                   (EXECUTABLE TARGET)  
+EchoMIDI_CONAN_AUTO_INSTALL   (OPTION ON/OFF)  
+EchoMIDI_GEN_DOCS             (OPTION ON/OFF)  
+``` 
 
 `EchoMIDI_CONAN_AUTO_INSTALL`
 Automaticly downloads any dependencies and makes them avaliable to the build system.
