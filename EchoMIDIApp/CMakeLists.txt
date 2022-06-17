@@ -1,4 +1,4 @@
-project("EchoMIDIApp")
+project("EchoMIDIApp" VERSION 0.3.1)
 
 set(SRC
 	src/EchoMIDI.cpp

@@ -75,7 +75,7 @@ int main()
 
 			std::string focus_mute_app;
 
-			std::cin >> focus_mute_app;
+			std::getline(std::cin, focus_mute_app);
 
 			echoer.focusMute(out_device, focus_mute_app);
 
