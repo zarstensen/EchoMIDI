@@ -41,7 +41,7 @@ namespace EchoMIDI
 	/// as a midi device name cannot be longer than MAXPNAMELEN.
 	/// 
 	/// @return the id of the found device. if none is found, INVALID_MIDI_ID is returned
-	UINT getMidiInIDByName(std::string name);
+	UINT getMidiInIDByName(const std::string& name);
 	/// @brief retrieves the id of an output midi device by name.
 	/// the name passed must match excactly to the device name, before it is recognized as a match.
 	/// 
@@ -49,7 +49,7 @@ namespace EchoMIDI
 	/// as a midi device name cannot be longer than MAXPNAMELEN.
 	/// 
 	/// @return the id of the found device. if none is found, INVALID_MIDI_ID is returned
-	UINT getMidiOutIDByName(std::string name);
+	UINT getMidiOutIDByName(const std::string& name);
 
 	/// @brief same as getMidiInputName if midi_io_type is MIDIIOType::INPUT,
 	/// and same as getMidiOutputName if midi_io_type is MIDIIOType::OUTPUT.

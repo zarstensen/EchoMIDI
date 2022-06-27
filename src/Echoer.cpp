@@ -94,7 +94,7 @@ namespace EchoMIDI
 		return midi_info.szPname;
 	}
 
-	UINT getMidiInIDByName(std::string name)
+	UINT getMidiInIDByName(const std::string& name)
 	{
 		if (name.size() <= MAXPNAMELEN)
 		{
@@ -108,7 +108,7 @@ namespace EchoMIDI
 		return UINT_MAX;
 	}
 
-	UINT getMidiOutIDByName(std::string name)
+	UINT getMidiOutIDByName(const std::string& name)
 	{
 		if (name.size() <= MAXPNAMELEN)
 		{
@@ -217,10 +217,9 @@ namespace EchoMIDI
 		if (isOpen())
 			throw MIDIEchoExcept("Cannot open an already open Echoer", "Open Err", NULL, MIDIIOType::INPUT, m_midi_id);
 
-		MMRESULT res = midiInOpen(&m_midi_source, m_midi_id, (DWORD_PTR)&midiCallback, (DWORD_PTR)this, CALLBACK_FUNCTION);
-
-		handleInputErr(res, id);
+		handleInputErr(midiInOpen(&m_midi_source, id, (DWORD_PTR)&midiCallback, (DWORD_PTR)this, CALLBACK_FUNCTION), id);
 		
+		m_midi_id = id;
 		m_is_open = true;
 	}
 
