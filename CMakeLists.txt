@@ -6,7 +6,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 
-project("EchoMIDI" VERSION 0.3.2 LANGUAGES CXX)
+project("EchoMIDI" VERSION 0.4.0 LANGUAGES CXX)
 
 # place all predefined target projects into a filter
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -34,11 +34,11 @@ add_library ( ${PROJECT_NAME}
 
 foreach(SRC_FILE ${SRC} ${INCLUDE})
 
-	message(${SRC_FILE})
-
 	get_property(COMP_DEFS SOURCE ${SRC_FILE} PROPERTY COMPILE_DEFINITIONS)
 
 	get_filename_component(ABS_PATH ${SRC_FILE} ABSOLUTE ${CMAKE_CURRENT_SOURCE_DIR})
+	
+	# remove github repositry folder from the relative root.
 	get_filename_component(REL_ROOT ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 
 	string(REPLACE ${REL_ROOT} "" REL_PATH ${ABS_PATH})
@@ -46,6 +46,7 @@ foreach(SRC_FILE ${SRC} ${INCLUDE})
 	list(APPEND COMP_DEFS "__RELATIVE_FILE__=\"${REL_PATH}\"")
 
 	set_property(SOURCE ${SRC_FILE} PROPERTY COMPILE_DEFINITIONS ${COMP_DEFS})
+
 endforeach()
 
 if(MSVC)
@@ -60,6 +61,29 @@ source_group("src" FILES ${SRC})
 source_group("include" FILES ${INCLUDE})
 
 # handle packages
+
+# conan autoinstall
+
+if(${EchoMIDI_CONAN_AUTO_INSTALL})
+
+	# setup conan file inside build directory.
+	file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/conan")
+
+	message(STATUS "Running conan install command")
+	execute_process(COMMAND conan install "${CMAKE_SOURCE_DIR}" --build missing WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/conan")
+	execute_process(COMMAND conan install "${CMAKE_SOURCE_DIR}" --build missing WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/conan" RESULT_VARIABLE EchoMIDI_CONAN_INSTALL_RESULT)
+
+	if(${EchoMIDI_CONAN_INSTALL_RESULT} EQUAL 0)
+		message(STATUS "Finished conan install")
+	elseif(${EchoMIDI_CONAN_INSTALL_RESULT})
+		message(WARNING "Conan install finished with errors!")
+	else()
+		message(WARNING "File could not be found! Please check that Conan is installed on the system. to install use this command (pip install conan)")
+	endif()
+
+endif()
+
+include("${CMAKE_BINARY_DIR}/conan/conan_paths.cmake" OPTIONAL)
 
 target_link_libraries(${PROJECT_NAME} winmm.lib)
 
@@ -91,30 +115,6 @@ if(${${PROJECT_NAME}_GEN_DOCS})
 	)
 
 endif()
-
-# conan autoinstall
-
-if(${${PROJECT_NAME}_CONAN_AUTO_INSTALL})
-
-	message(${CMAKE_BINARY_DIR}/conan)
-
-	# setup conan file inside build directory.
-	execute_process(COMMAND mkdir "${CMAKE_BINARY_DIR}/conan" OUTPUT_QUIET ERROR_QUIET)
-
-	message(STATUS "Running conan install command")
-	execute_process(COMMAND conan install "${CMAKE_SOURCE_DIR}" --build missing WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/conan" RESULT_VARIABLE EchoMIDI_CONAN_INSTALL_RESULT)
-	
-	if(${EchoMIDI_CONAN_INSTALL_RESULT} EQUAL 0)
-		message(STATUS "Finished conan install")
-	elseif(${EchoMIDI_CONAN_INSTALL_RESULT})
-		message(WARNING "Conan install finished with errors!")
-	else()
-		message(WARNING "Conan could not be found! Please install conan using pip (pip install conan)")
-	endif()
-
-endif()
-
-include("${CMAKE_BINARY_DIR}/conan/conan_paths.cmake" OPTIONAL)
 
 # CURRENTLY UNUSED
 

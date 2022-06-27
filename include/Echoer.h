@@ -78,6 +78,10 @@ namespace EchoMIDI
 		};
 
 	public:
+
+		/// @brief Constructs an Echoer instance with an invalid input device id.
+		Echoer();
+
 		/// @brief constructs a Echoer, the source id cannot be changed after construction.
 		/// @param source the midi input id which input should be echoed out to the midi output targets.
 		/// 
@@ -133,6 +137,18 @@ namespace EchoMIDI
 		/// @throw MIDIEchoExcept
 		void reset();
 
+		/// @brief opens the midi device corresponding to the passed id.
+		/// the echoer must be closed before this is called.
+		void open(UINT id);
+		/// @brief reopens the last open midi device.
+		void open();
+		/// @brief closes the current midi input device.
+		/// the echoer must be stopped before this is called.
+		void close();
+
+		/// @brief checks wether the current Echoer instance has opened a midi input device.
+		bool isOpen() { return m_is_open; }
+
 		/// @brief starts echoing the midi data from the source device into the target devices.
 		/// throws if already started.
 		/// @see isLitening(), stop()
@@ -162,12 +178,20 @@ namespace EchoMIDI
 			return m_midi_targets.end();
 		}
 
+		/// @brief allows an Echoer to be evaluated in boolean operations.
+		/// true if source is a valid input device, otherwise false.
+		operator bool()
+		{
+			return m_midi_id != INVALID_MIDI_ID;
+		}
+
 	private:
 		HMIDIIN m_midi_source = NULL;
 		UINT m_midi_id;
 		std::map<UINT, MIDIOutDevice> m_midi_targets;
 
 		bool m_is_echoing = false;
+		bool m_is_open = false;
 	};
 
 	// ============ EXCEPTIONS ============

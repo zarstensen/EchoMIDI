@@ -162,14 +162,15 @@ namespace EchoMIDI
 
 	// ============ Echoer ============
 
+	Echoer::Echoer()
+		: m_midi_id(INVALID_MIDI_ID)
+	{
+		registerEchoer(this);
+	}
+
 	Echoer::Echoer(UINT source)
 		: m_midi_id(source)
 	{
-
-		MMRESULT res = midiInOpen(&m_midi_source, m_midi_id, (DWORD_PTR)&midiCallback, (DWORD_PTR)this, CALLBACK_FUNCTION);
-
-		handleInputErr(res, source);
-
 		registerEchoer(this);
 	}
 
@@ -177,11 +178,9 @@ namespace EchoMIDI
 	{
 		if (isEchoing())
 			stop();
-
-		handleInputErr(midiInReset(m_midi_source), m_midi_id);
-		MMRESULT res = midiInClose(m_midi_source);
-
-		handleInputErr(res, m_midi_id);
+		
+		if(isOpen())
+			close();
 
 		for (auto [id, target] : getTargets())
 		{
@@ -211,6 +210,34 @@ namespace EchoMIDI
 			handleInputErr(midiOutClose(m_midi_targets[id].device_handle), id);
 			m_midi_targets.erase(id);
 		}
+	}
+
+	void Echoer::open(UINT id)
+	{
+		if (isOpen())
+			throw MIDIEchoExcept("Cannot open an already open Echoer", "Open Err", NULL, MIDIIOType::INPUT, m_midi_id);
+
+		MMRESULT res = midiInOpen(&m_midi_source, m_midi_id, (DWORD_PTR)&midiCallback, (DWORD_PTR)this, CALLBACK_FUNCTION);
+
+		handleInputErr(res, id);
+		
+		m_is_open = true;
+	}
+
+	void Echoer::open()
+	{
+		open(m_midi_id);
+	}
+
+	void Echoer::close()
+	{
+		if (isEchoing())
+			throw MIDIEchoExcept("Cannot close midi device if it is currently echoing", "Close Err", NULL, MIDIIOType::INPUT, m_midi_id);
+
+		handleInputErr(midiInReset(m_midi_source), m_midi_id);
+		handleInputErr(midiInClose(m_midi_source), m_midi_id);
+
+		m_is_open = false;
 	}
 
 	void Echoer::reset()
