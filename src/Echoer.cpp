@@ -21,6 +21,8 @@ namespace EchoMIDI
 				return;
 			case MMSYSERR_BADDEVICEID:
 				throw BADINID(id);
+			case MMSYSERR_NOMEM:
+				throw DeviceAllocated(MIDIIOType::INPUT, id);
 			case MMSYSERR_ALLOCATED:
 				throw DeviceAllocated(MIDIIOType::INPUT, id);
 			default:
@@ -48,6 +50,8 @@ namespace EchoMIDI
 				return;
 			case MMSYSERR_BADDEVICEID:
 				throw BADOUTID(id);
+			case MMSYSERR_NOMEM:
+				throw DeviceAllocated(MIDIIOType::OUTPUT, id);
 			case MMSYSERR_ALLOCATED:
 				throw DeviceAllocated(MIDIIOType::OUTPUT, id);
 			default:
@@ -155,7 +159,6 @@ namespace EchoMIDI
 			{
 				if (!(midi_out.user_muted || midi_out.focus_muted))
 					handleOutputErr(midiOutLongMsg(midi_out.device_handle, (LPMIDIHDR)dwParam1, (UINT)dwParam2), id);
-
 			}
 		}
 	}
