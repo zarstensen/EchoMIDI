@@ -9,7 +9,7 @@
 
 # EchoMIDI
 
-EchoMIDI is a program + library that copies the output of a midi device into multiple output devices. This can be used in combinartion with other software, like [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html), in order to use a single midi input in multiple audio / midi applications at the same time. In addition, each output target can be muted manually or auto muted (also called FocusMute) depending on which application currently has the keyboard focus.
+EchoMIDI is a program + library that copies the output of a midi device into multiple output devices. This can be used in combinartion with other software, like [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html), in order to use a single midi input in multiple audio / midi applications at the same time. In addition, each output target can be muted manually or auto muted (also called FocusSend) depending on which application currently has the keyboard focus.
 
 ## Application Overview
 
