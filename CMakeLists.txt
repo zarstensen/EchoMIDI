@@ -6,13 +6,12 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 
-project("EchoMIDI" VERSION 0.5.0 LANGUAGES CXX)
+project("EchoMIDI" VERSION 0.5.1 LANGUAGES CXX)
 
 # place all predefined target projects into a filter
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(PREDEFINED_TARGETS_FOLDER "Targets")
 
-option("${PROJECT_NAME}_CONAN_AUTO_INSTALL" OFF "Automaticly sets up conan directory and installs all the requirements in the conanfile.txt. Only works if conan is installed.")
 option("${PROJECT_NAME}_GEN_DOCS" OFF "Generate docs using Doxygen. (requires Doxygen to be installed)")
 
 set (SRC
