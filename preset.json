@@ -1,0 +1,15 @@
+{
+  "Midi Inputs": [
+    {
+      "name": "VI49",
+      "send": true,
+      "Midi Outputs": [
+        {
+          "focus mute": "reaper",
+          "muted": false,
+          "name": "LoopMIDI Port"
+        }
+      ]
+    }
+  ]
+}
