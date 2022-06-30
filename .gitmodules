@@ -1,3 +1,6 @@
 [submodule "EchoMIDIApp/modules/wxWidgets"]
 	path = EchoMIDIApp/modules/wxWidgets
 	url = https://github.com/wxWidgets/wxWidgets
+[submodule "EchoMIDIApp/modules/json"]
+	path = EchoMIDIApp/modules/json
+	url = https://github.com/nlohmann/json.git
