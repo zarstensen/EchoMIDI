@@ -118,15 +118,15 @@ namespace EchoMIDI
 			{
 				for (auto& [id, midi_out] : *echoer)
 				{
-					if (midi_out.focus_mute_path.empty())
+					if (midi_out.focus_send_path.empty())
 						continue;
 
 					if (// check if the two paths match excactly
-						midi_out.focus_mute_path.has_parent_path() && midi_out.focus_mute_path == window_path ||
+						midi_out.focus_send_path.has_parent_path() && midi_out.focus_send_path == window_path ||
 						// if the path is relative, only check the executable name, accounting for a lack of extension aswell
-						!midi_out.focus_mute_path.has_parent_path() &&
-						(midi_out.focus_mute_path.has_extension() && midi_out.focus_mute_path.filename() == window_path.filename() ||
-							midi_out.focus_mute_path.filename() == window_path.filename().replace_extension("")))
+						!midi_out.focus_send_path.has_parent_path() &&
+						(midi_out.focus_send_path.has_extension() && midi_out.focus_send_path.filename() == window_path.filename() ||
+							midi_out.focus_send_path.filename() == window_path.filename().replace_extension("")))
 					{
 						midi_out.focus_muted = false;
 					}

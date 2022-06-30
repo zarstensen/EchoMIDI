@@ -73,7 +73,7 @@ namespace EchoMIDI
 		{
 			bool user_muted = false;
 			bool focus_muted = false;
-			std::filesystem::path focus_mute_path;
+			std::filesystem::path focus_send_path;
 			HMIDIOUT device_handle = NULL;
 		};
 
@@ -121,9 +121,9 @@ namespace EchoMIDI
 			m_midi_targets[id].user_muted;
 		}
 
-		void focusMute(UINT id, std::filesystem::path exec);
+		void focusSend(UINT id, std::filesystem::path exec);
 
-		std::filesystem::path getFocusMuteExec(UINT id);
+		std::filesystem::path getFocusSendExec(UINT id);
 
 		/// @brief retrieve the current midi output devices which are recieving data from the midi input device.
 		/// @return a map from the device id and its midi output handler and mute status.

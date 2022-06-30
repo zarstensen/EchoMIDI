@@ -259,7 +259,7 @@ namespace EchoMIDI
 		handleOutputErr(midiInStop(m_midi_source), m_midi_id);
 	}
 
-	void Echoer::focusMute(UINT id, std::filesystem::path exec)
+	void Echoer::focusSend(UINT id, std::filesystem::path exec)
 	{
 		if (!m_midi_targets.contains(id))
 		{
@@ -274,6 +274,11 @@ namespace EchoMIDI
 		else
 			m_midi_targets[id].focus_muted = false;
 
-		m_midi_targets[id].focus_mute_path = exec;
+		m_midi_targets[id].focus_send_path = exec;
+	}
+
+	std::filesystem::path Echoer::getFocusSendExec(UINT id)
+	{
+		return m_midi_targets[id].focus_send_path;
 	}
 }

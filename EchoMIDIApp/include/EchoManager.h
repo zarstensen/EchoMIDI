@@ -12,7 +12,7 @@ public:
 	{
 		bool avaliable;
 		std::map<std::string, bool> mute;
-		std::map<std::string, std::string> focus_mute;
+		std::map<std::string, std::string> focus_send;
 	};
 
 	struct MidiInProps
@@ -108,7 +108,7 @@ public:
 					for (auto& [input_name, _] : m_midi_inputs)
 					{
 						setTargetMute(output_name, input_name, midi_out_props.mute[input_name]);
-						setTargetFocusMute(output_name, input_name, midi_out_props.focus_mute[input_name]);
+						setTargetFocusSend(output_name, input_name, midi_out_props.focus_send[input_name]);
 					}
 				}
 			}
@@ -180,16 +180,16 @@ public:
 			m_midi_inputs[source].echoer.setMute(out_id, val);
 	}
 
-	void setTargetFocusMute(const std::string& target, const std::string& source, const std::string& val)
+	void setTargetFocusSend(const std::string& target, const std::string& source, const std::string& val)
 	{
-		m_midi_outputs[target].focus_mute[source] = val;
+		m_midi_outputs[target].focus_send[source] = val;
 		
 		tryAddTarget(target, source);
 
 		UINT out_id = EchoMIDI::getMidiOutIDByName(target);
 
 		if (m_midi_inputs[source].avaliable && m_midi_inputs[source].echo && m_midi_inputs[source].echoer.getTargets().contains(out_id))
-			m_midi_inputs[source].echoer.focusMute(out_id, val);
+			m_midi_inputs[source].echoer.focusSend(out_id, val);
 
 	}
 
@@ -221,7 +221,7 @@ private:
 		if (in_props.avaliable && out_props.mute.contains(source) && !out_props.mute[source] && !in_props.echoer.getTargets().contains(target_id))
 		{
 			m_midi_inputs[source].echoer.add(target_id);
-			m_midi_inputs[source].echoer.focusMute(target_id, m_midi_outputs[target].focus_mute[source]);
+			m_midi_inputs[source].echoer.focusSend(target_id, m_midi_outputs[target].focus_send[source]);
 			m_midi_inputs[source].echoer.setMute(target_id, false);
 		}
 	}

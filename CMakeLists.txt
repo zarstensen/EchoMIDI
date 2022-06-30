@@ -6,7 +6,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 
-project("EchoMIDI" VERSION 0.4.2 LANGUAGES CXX)
+project("EchoMIDI" VERSION 0.5.0 LANGUAGES CXX)
 
 # place all predefined target projects into a filter
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -61,29 +61,6 @@ source_group("src" FILES ${SRC})
 source_group("include" FILES ${INCLUDE})
 
 # handle packages
-
-# conan autoinstall
-
-if(${EchoMIDI_CONAN_AUTO_INSTALL})
-
-	# setup conan file inside build directory.
-	file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/conan")
-
-	message(STATUS "Running conan install command")
-	execute_process(COMMAND conan install "${CMAKE_SOURCE_DIR}" --build missing WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/conan")
-	execute_process(COMMAND conan install "${CMAKE_SOURCE_DIR}" --build missing WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/conan" RESULT_VARIABLE EchoMIDI_CONAN_INSTALL_RESULT)
-
-	if(${EchoMIDI_CONAN_INSTALL_RESULT} EQUAL 0)
-		message(STATUS "Finished conan install")
-	elseif(${EchoMIDI_CONAN_INSTALL_RESULT})
-		message(WARNING "Conan install finished with errors!")
-	else()
-		message(WARNING "File could not be found! Please check that Conan is installed on the system. to install use this command (pip install conan)")
-	endif()
-
-endif()
-
-include("${CMAKE_BINARY_DIR}/conan/conan_paths.cmake" OPTIONAL)
 
 target_link_libraries(${PROJECT_NAME} winmm.lib)
 

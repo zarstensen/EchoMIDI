@@ -8,9 +8,6 @@
 #include <wx/dataview.h>
 #include <wx/grid.h>
 
-#include <rapidjson/document.h>
-#include <rapidjson/istreamwrapper.h>
-
 #include <Windows.h>
 
 #include <iostream>
@@ -175,11 +172,11 @@ public:
 	{
 		// setup the data view list ctrl
 		m_listctrl->AppendTextColumn("MIDI Output Device", wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxDATAVIEW_COL_SORTABLE);
-		m_listctrl->AppendTextColumn("Focus Mute", wxDATAVIEW_CELL_EDITABLE, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxDATAVIEW_COL_SORTABLE);
+		m_listctrl->AppendTextColumn("Focus Send", wxDATAVIEW_CELL_EDITABLE, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxDATAVIEW_COL_SORTABLE);
 		m_listctrl->AppendToggleColumn("Send", wxDATAVIEW_CELL_ACTIVATABLE, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxDATAVIEW_COL_SORTABLE);
 
 		m_listctrl->Bind(wxEVT_DATAVIEW_ITEM_VALUE_CHANGED, &MidiOutputsTable::onSendToggle, this);
-		m_listctrl->Bind(wxEVT_DATAVIEW_ITEM_EDITING_DONE, &MidiOutputsTable::onFocusMuteChange, this);
+		m_listctrl->Bind(wxEVT_DATAVIEW_ITEM_EDITING_DONE, &MidiOutputsTable::onFocusSendChange, this);
 	}
 
 	void updateTable()
@@ -202,13 +199,13 @@ public:
 					if (!output_props.mute.contains(m_active_source))
 						m_manager.setTargetMute(output_name, m_active_source, true);
 
-					if (!output_props.focus_mute.contains(m_active_source))
-						m_manager.setTargetFocusMute(output_name, m_active_source, "");
+					if (!output_props.focus_send.contains(m_active_source))
+						m_manager.setTargetFocusSend(output_name, m_active_source, "");
 					
 					if (m_list_rows.contains(output_name))
 					{
 						auto test = m_listctrl->ItemToRow(m_list_rows[output_name]);
-						m_listctrl->SetTextValue(output_props.focus_mute.at(m_active_source), m_listctrl->ItemToRow(m_list_rows[output_name]), 1);
+						m_listctrl->SetTextValue(output_props.focus_send.at(m_active_source), m_listctrl->ItemToRow(m_list_rows[output_name]), 1);
 						m_listctrl->SetToggleValue(!output_props.mute.at(m_active_source), m_listctrl->ItemToRow(m_list_rows[output_name]), 2);
 					}
 					else
@@ -217,7 +214,7 @@ public:
 						row.reserve(3);
 
 						row.push_back(output_name);
-						row.push_back(output_props.focus_mute.at(m_active_source));
+						row.push_back(output_props.focus_send.at(m_active_source));
 						row.push_back(!output_props.mute.at(m_active_source));
 
 						m_listctrl->AppendItem(row);
@@ -269,7 +266,7 @@ protected:
 		}
 	}
 
-	void onFocusMuteChange(wxDataViewEvent& e)
+	void onFocusSendChange(wxDataViewEvent& e)
 	{
 		int row = m_listctrl->ItemToRow(e.GetItem());
 
@@ -277,7 +274,7 @@ protected:
 		
 		try
 		{
-			m_manager.setTargetFocusMute(device, m_active_source, e.GetValue().GetString().ToStdString());
+			m_manager.setTargetFocusSend(device, m_active_source, e.GetValue().GetString().ToStdString());
 		}
 		catch (EchoMIDI::MIDIEchoExcept&)
 		{
