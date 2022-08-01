@@ -1,5 +1,14 @@
 #include "EchoManager.h"
 
+#include <fstream>
+
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
+
+// ============ Public ============
+
 // TODO: check for optimizations / potential code cleanups.
 void EchoManager::syncMidiDevices()
 {
@@ -82,6 +91,10 @@ void EchoManager::syncMidiDevices()
 			{
 				for (auto& [input_name, _] : m_midi_inputs)
 				{
+					// TODO: custom type that default constructs to false instead of this.
+					if (!midi_out_props.mute.contains(input_name))
+						midi_out_props.mute[input_name] = true;
+
 					setTargetMute(output_name, input_name, midi_out_props.mute[input_name]);
 					setTargetFocusSend(output_name, input_name, midi_out_props.focus_send[input_name]);
 				}
@@ -163,7 +176,69 @@ void EchoManager::setTargetFocusSend(const std::string& target, const std::strin
 
 void EchoManager::saveToFile(std::filesystem::path file)
 {
+
+	ordered_json midi_inputs = ordered_json::array_t();
+	
+	for (auto& [in_name, in_props] : m_midi_inputs)
+	{
+		ordered_json midi_input_obj = ordered_json::object();
+
+		midi_input_obj["Name"] = in_name;
+		midi_input_obj["Echo"] = in_props.echo;
+		midi_input_obj["Midi Outputs"] = ordered_json::array_t();
+
+		auto test = midi_input_obj.dump();
+
+		// save output target properties
+
+		for (auto& [out_name, out_props] : m_midi_outputs)
+		{
+			// only save, if the properties actually exists
+			if (out_props.mute.contains(in_name))
+			{
+				ordered_json midi_output_obj;
+
+				midi_output_obj["Name"] = out_name;
+				midi_output_obj["Mute"] = out_props.mute[in_name];
+				midi_output_obj["Focus send"] = out_props.focus_send[in_name];
+
+				midi_input_obj["Midi Outputs"].push_back(midi_output_obj);
+			}
+		}
+
+		midi_inputs.push_back(midi_input_obj);
+	}
+
+	ordered_json j_out = ordered_json({ {"Midi Inputs", midi_inputs} });
+	
+	std::ofstream file_out(file);
+
+	file_out << j_out.dump(4);
+
+	file_out.close();
 }
+
+void EchoManager::loadFromFile(std::filesystem::path file, bool keep_unsaved)
+{
+	json j_in;
+
+	std::ifstream file_in(file);
+
+	file_in >> j_in;
+
+	for (json& midi_input : j_in["Midi Inputs"])
+	{
+		setInEcho(midi_input["Name"], midi_input["Echo"]);
+
+		for (json& midi_output : midi_input["Midi Outputs"])
+		{
+			setTargetMute(midi_output["Name"], midi_input["Name"], midi_output["Mute"]);
+			setTargetFocusSend(midi_output["Name"], midi_input["Name"], midi_output["Focus send"]);
+		}
+	}
+}
+
+// ============ Private ============
 
 void EchoManager::tryAddTarget(const std::string& target, const std::string& source)
 {

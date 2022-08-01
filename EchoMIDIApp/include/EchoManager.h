@@ -58,6 +58,7 @@ public:
 
 	// I/O functions
 
+	/// @brief saves all the currently stored midi devices' properties into a JSON format that can later be loaded using the loadFromFile() function.
 	void saveToFile(std::filesystem::path file);
 	void loadFromFile(std::filesystem::path file, bool keep_unsaved = true);
 

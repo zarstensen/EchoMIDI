@@ -7,6 +7,7 @@
 #include <wx/editlbox.h>
 #include <wx/dataview.h>
 #include <wx/grid.h>
+#include <wx/taskbar.h>
 
 #include <Windows.h>
 
@@ -300,11 +301,16 @@ public:
 		const wxString& name = wxASCII_STR(wxPanelNameStr))
 		: wxWindow(parent, id, pos, size, style, name)
 	{
+		
+
 		m_midi_input_frame = new wxStaticBoxSizer(wxVERTICAL, this, "MIDI Inputs");
 		m_midi_inputs = new MidiInputsTable(m_midi_input_frame->GetStaticBox(), m_manager);
 
 		m_midi_output_frame = new wxStaticBoxSizer(wxVERTICAL, this, "MIDI Outputs [NONE]");
 		m_midi_outputs = new MidiOutputsTable(m_midi_output_frame->GetStaticBox(), m_manager);
+
+		if(std::filesystem::exists("EchoMidiDevProps.json"))
+			m_manager.loadFromFile("EchoMidiDevProps.json");
 
 		m_manager.syncMidiDevices();
 
@@ -338,6 +344,11 @@ public:
 			std::format(NAME_FORMAT_STRING, EchoMIDI::getMidiInIDByName(new_source) != EchoMIDI::INVALID_MIDI_ID ? new_source : "NONE"));
 	}
 
+	~EchoMidiWindow()
+	{
+		m_manager.saveToFile("EchoMidiDevProps.json");
+	}
+
 private:
 
 	constexpr static const char* NAME_FORMAT_STRING = "MIDI Outputs [{}]";
@@ -361,8 +372,6 @@ class EchoMidiApp : public wxApp
 	EchoMidiWindow* main_window;
 
 	wxSize size = { 800, 400 };
-
-	EchoManager manager;
 	
 	virtual bool OnInit() override
 	{

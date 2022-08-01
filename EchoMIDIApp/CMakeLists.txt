@@ -1,4 +1,4 @@
-project("EchoMIDIApp" VERSION 0.4.2)
+project("EchoMIDIApp" VERSION 0.4.3)
 
 
 set(SRC
