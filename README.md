@@ -105,4 +105,5 @@ This is a Windows only library + application. It has been build and tested on Wi
 ## External Libraries Used
 
 - [wxWidgets](https://github.com/wxWidgets/wxWidgets) for the user interface
+- [JSON for Modern C++](https://github.com/nlohmann/json) for reading + writing json files
 - [winmm](https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/midi-and-directmusic-components) (local windows library) used for recieving and sending midi sinals
